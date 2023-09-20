@@ -89,7 +89,9 @@ public class AudioPlayer: AVPlayerWrapperDelegate {
      */
     public var playWhenReady: Bool {
         get { wrapper.playWhenReady }
-        set { wrapper.playWhenReady = newValue }
+        set {
+            wrapper.playWhenReady = newValue
+        }
     }
     
     /**
@@ -306,7 +308,7 @@ public class AudioPlayer: AVPlayerWrapperDelegate {
     func updateNowPlayingPlaybackValues() {
         nowPlayingInfoController.set(keyValues: [
             MediaItemProperty.duration(wrapper.duration),
-            NowPlayingInfoProperty.playbackRate(Double(wrapper.rate)),
+            NowPlayingInfoProperty.playbackRate(wrapper.playWhenReady ? Double(wrapper.rate) : 0),
             NowPlayingInfoProperty.elapsedPlaybackTime(wrapper.currentTime)
         ])
     }
@@ -458,9 +460,17 @@ public class AudioPlayer: AVPlayerWrapperDelegate {
     func AVWrapper(didUpdateDuration duration: Double) {
         event.updateDuration.emit(data: duration)
     }
-
-    func AVWrapper(didReceiveMetadata metadata: [AVTimedMetadataGroup]) {
-        event.receiveMetadata.emit(data: metadata)
+    
+    func AVWrapper(didReceiveCommonMetadata metadata: [AVMetadataItem]) {
+        event.receiveCommonMetadata.emit(data: metadata)
+    }
+    
+    func AVWrapper(didReceiveChapterMetadata metadata: [AVTimedMetadataGroup]) {
+        event.receiveChapterMetadata.emit(data: metadata)
+    }
+    
+    func AVWrapper(didReceiveTimedMetadata metadata: [AVTimedMetadataGroup]) {
+        event.receiveTimedMetadata.emit(data: metadata)
     }
 
     func AVWrapper(didChangePlayWhenReady playWhenReady: Bool) {

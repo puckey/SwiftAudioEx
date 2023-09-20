@@ -198,7 +198,8 @@ public class QueuedAudioPlayer: AudioPlayer, QueueManagerDelegate {
             return
         }
         if (repeatMode == .track) {
-            replay()
+            // quick workaround for race condition - schedule a call after 2 frames
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.016 * 2) { [weak self] in self?.replay() }
         } else if (repeatMode == .queue) {
             _ = queue.next(wrap: true)
         } else if (currentIndex != items.count - 1) {
